@@ -1,0 +1,34 @@
+services:
+
+  nginx:
+    build: requirements/nginx/.
+    container_name: nginx
+    ports:
+      - "443:443"
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpressDB
+
+  wordpress:
+    build: requirements/wordpress/.
+    container_name: wp-php
+    ports:
+      - "9000:9000"
+    depends_on:
+      - DB
+    volumes:
+      - wordpressDB
+
+  DB:
+    build: requirements/mariadb/.
+    container_name: mariadb
+    ports:
+      - "3306:3306"
+    volumes:
+      - DB
+
+
+volumes:
+  wordpressDB:
+  DB:
