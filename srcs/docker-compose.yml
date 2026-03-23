@@ -8,7 +8,12 @@ services:
     depends_on:
       - wordpress
     volumes:
-      - wordpressDB
+      - wordpressfiles:/var/www/html
+    networks:
+      - main
+    env_file:
+      - .env
+    restart: always
 
   wordpress:
     build: requirements/wordpress/.
@@ -16,19 +21,55 @@ services:
     ports:
       - "9000:9000"
     depends_on:
-      - DB
+      - database
     volumes:
-      - wordpressDB
+      - wordpressfiles:/var/www/html
+    networks:
+      - main
+    env_file:
+      - .env
+    secrets:
+      - db_password
+    restart: always
 
-  DB:
+  database:
     build: requirements/mariadb/.
     container_name: mariadb
     ports:
       - "3306:3306"
     volumes:
-      - DB
+      - databasefiles:/var/lib/mysql
+    networks:
+      - main
+    env_file:
+      - .env
+    secrets:
+      - db_root_password
+      - db_password
+    restart: always
 
+
+networks:
+  main:
+    driver: bridge
+    name: main
 
 volumes:
-  wordpressDB:
-  DB:
+  wordpressfiles:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/wordpress
+  databasefiles:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/mariadb
+
+secrets:
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  db_password:
+    file: ../secrets/db_password.txt
