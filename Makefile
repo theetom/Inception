@@ -17,7 +17,7 @@ clean: stop
 	docker system prune -a --force
 
 fclean: clean
-	sudo rm -rf /home/etom/data/mariadb/*
+	sudo rm -rf /home/${USER}/data/*
 
 re: fclean all
 

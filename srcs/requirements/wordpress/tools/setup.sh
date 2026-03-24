@@ -21,5 +21,5 @@ if [ -z "$PHP_FPM" ]; then
         fi
     done
 fi
-
+echo wp container running
 exec "$PHP_FPM" --nodaemonize --allow-to-run-as-root # instead could be -F -R

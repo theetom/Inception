@@ -1,8 +1,14 @@
 FROM debian:oldstable
 
 RUN apt-get update -y && apt-get upgrade -y
-RUN apt-get install mariadb-server mariadb-client galera-4 -y
+RUN apt-get install mariadb-server mariadb-client -y
 
-COPY script/setup.sh /setup.sh
-RUN chmod +x /setup.sh
-CMD ["/setup.sh"]
+RUN mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld && chmod 755 /run/mysqld
+
+COPY tools/setup.sh /tmp/setup.sh
+RUN chmod +x /tmp/setup.sh
+
+
+
+ENTRYPOINT [ "/tmp/setup.sh" ]
+# CMD ["/setup.sh"]

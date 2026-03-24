@@ -9,4 +9,4 @@ RUN mv wordpress /var/www/html/wordpress
 
 COPY tools/setup.sh /wordpress.sh
 RUN chmod +x /wordpress.sh
-CMD ["/wordpress.sh"]
+# CMD ["/wordpress.sh"]
