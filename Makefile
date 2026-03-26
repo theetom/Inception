@@ -17,11 +17,16 @@ clean: stop
 	docker system prune -a --force
 
 fclean: clean
-	sudo rm -rf /home/${USER}/data/*
+	sudo rm -rf /home/${USER}/data
 
 re: fclean all
 
+db:
+	docker exec -it mariadb mysql -u root -p
 stop:
 	docker compose -f srcs/docker-compose.yml down
 
-.PHONY: all clean fclean re stop
+
+
+
+.PHONY: all clean fclean stop db re
