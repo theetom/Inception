@@ -1,18 +1,49 @@
-#!/bin/bash
+#!/bin/sh
 
-MYSQL_PASSWORD=$(cat /run/secrets/db_password)
-MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
-
-mysqld_safe --user=mysql
-sleep 2
-
-# Only create database and users if they don't exist
-if [ -z "$(mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='$MYSQL_DATABASE'" 2>/dev/null)" ]; then
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" << EOF
-        CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;
-        CREATE USER IF NOT EXISTS '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
-        CREATE USER IF NOT EXISTS 'second_user'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
-EOF
+if [ -f /run/secrets/db_password ]; then
+    SQL_PASSWORD=$(cat /run/secrets/db_password)
+else
+    echo "Error: Secret db_password not found"
+    exit 1
 fi
 
-echo "MariaDB setup complete"
+if [ -f /run/secrets/db_root_password ]; then
+    SQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
+else
+    echo "Error: Secret db_root_password not found"
+    exit 1
+fi
+
+
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+
+    echo "Inception: First time starting MariaDB ..."
+
+	mariadb-install-db --user=mysql --datadir=/var/lib/mysql > /dev/null
+
+cat << EOF > /tmp/mariadb_setup.sql
+USE mysql;
+FLUSH PRIVILEGES;
+
+DELETE FROM mysql.user WHERE User='';
+DROP DATABASE IF EXISTS test;
+
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';
+
+CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
+
+CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${SQL_PASSWORD}';
+GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';
+FLUSH PRIVILEGES;
+EOF
+
+	/usr/bin/mariadbd --user=mysql --bootstrap < /tmp/mariadb_setup.sql
+    rm -f /tmp/mariadb_setup.sql
+
+	echo "Inception: Database and user '${MYSQL_USER}' created"
+else
+	echo "Inception: Database Already Started"
+fi
+
+echo "Inception: MariaDB ready and listening port 3306."
+exec /usr/bin/mariadbd --user=mysql --datadir=/var/lib/mysql --skip-networking=0 --bind-address=0.0.0.0

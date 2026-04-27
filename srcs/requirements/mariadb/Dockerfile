@@ -1,14 +1,13 @@
-FROM debian:oldstable
+FROM alpine:3.22
 
-RUN apt-get update -y && apt-get upgrade -y
-RUN apt-get install mariadb-server mariadb-client -y
+RUN apk  update && apk --no-cache add mariadb mariadb-client
 
-RUN mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld && chmod 755 /run/mysqld
+RUN mkdir -p /var/lib/mysql /run/mysqld && \
+	chown -R mysql:mysql /var/lib/mysql /run/mysqld
 
-COPY tools/setup.sh /tmp/setup.sh
-RUN chmod +x /tmp/setup.sh
+COPY tools/setup.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/setup.sh
 
+EXPOSE 3306
 
-
-ENTRYPOINT [ "/tmp/setup.sh" ]
-# CMD ["/setup.sh"]
+ENTRYPOINT ["/usr/local/bin/setup.sh"]

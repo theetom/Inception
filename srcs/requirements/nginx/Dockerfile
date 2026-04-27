@@ -1,4 +1,8 @@
-FROM debian:oldstable
+FROM alpine:3.22
 
-RUN apt-get update -y && apt-get upgrade -y
-RUN apt-get install -y nginx openssl
+RUN apk update && apk upgrade
+
+RUN apk add --no-cache nginx openssl
+
+RUN mkdir -p /var/lib/nginx /var/www/html \
+	&& chown -R nginx:nginx /var/lib/nginx /var/www
