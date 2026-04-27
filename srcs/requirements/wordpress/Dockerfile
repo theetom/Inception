@@ -1,7 +1,6 @@
 FROM alpine:3.22
 
 RUN apk update &&apk add --no-cache \
-	# mariadb-client \
     php83 \
     php83-fpm \
     php83-mysqli \
@@ -19,7 +18,7 @@ RUN apk update &&apk add --no-cache \
 	curl \
     unzip
 
-RUN mkdir -p /srv/www 
+RUN mkdir -p /srv/www
 
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
 RUN ln -sf /usr/bin/php83 /usr/bin/php
@@ -31,4 +30,4 @@ EXPOSE 9000
 
 COPY tools/setup.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/setup.sh
-# ENTRYPOINT [ "/usr/local/bin/setup.sh" ]
+ENTRYPOINT [ "/usr/local/bin/setup.sh" ]
