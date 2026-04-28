@@ -14,4 +14,4 @@ EXPOSE 443
 
 COPY tools/setup.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/setup.sh
-ENTRYPOINT [ "/usr/local/bin/setup.sh" ]
+# ENTRYPOINT [ "/usr/local/bin/setup.sh" ]
